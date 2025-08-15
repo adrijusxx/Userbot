@@ -5,6 +5,7 @@ import re
 import signal
 import sys
 import argparse
+import yaml
 from telethon import TelegramClient, events
 from telethon.errors import SessionPasswordNeededError, PhoneCodeInvalidError, PhoneNumberInvalidError
 from typing import Optional
@@ -24,13 +25,27 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- Configuration for Userbot ---
-API_ID = int(os.environ.get('TELEGRAM_API_ID', '27567587'))
-API_HASH = os.environ.get('TELEGRAM_API_HASH', 'dd20d2e57837adccf9da7d7ee49c13d6')
-BOT_USERNAME = os.environ.get('TELEGRAM_BOT_USERNAME', 'AfterhoursFWL_Bot')
+def load_config():
+    """Load configuration from YAML file"""
+    config_file = 'env_vars-userbot.yml'
+    try:
+        with open(config_file, 'r') as f:
+            config = yaml.safe_load(f)
+        return config
+    except Exception as e:
+        print(f"Error loading config file: {e}")
+        return {}
+
+# Load config
+config = load_config()
+
+API_ID = int(config.get('TELEGRAM_API_ID', '27567587'))
+API_HASH = config.get('TELEGRAM_API_HASH', 'dd20d2e57837adccf9da7d7ee49c13d6')
+BOT_USERNAME = config.get('TELEGRAM_BOT_USERNAME', 'AfterhoursFWL_Bot')
 
 # Duplicate message handling configuration
-DUPLICATE_IGNORE_DURATION = int(os.environ.get('DUPLICATE_IGNORE_DURATION', '3600'))  # Default: 1 hour in seconds
-DUPLICATE_CHECK_ENABLED = os.environ.get('DUPLICATE_CHECK_ENABLED', 'true').lower() == 'true'
+DUPLICATE_IGNORE_DURATION = int(config.get('DUPLICATE_IGNORE_DURATION', '3600'))  # Default: 1 hour in seconds
+DUPLICATE_CHECK_ENABLED = config.get('DUPLICATE_CHECK_ENABLED', 'true').lower() == 'true'
 
 SESSION_NAME = 'driver_forwarding_session'
 SESSION_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), f'{SESSION_NAME}.session')
@@ -568,7 +583,7 @@ async def main():
     # Parse command line arguments
     args = parse_arguments()
     
-    # Override environment variables with command line arguments
+    # Override config values with command line arguments
     global DUPLICATE_IGNORE_DURATION, DUPLICATE_CHECK_ENABLED
     
     if args.ignore_duration is not None:
@@ -582,9 +597,9 @@ async def main():
         DUPLICATE_CHECK_ENABLED = False
         logger.info("Override: Message tracking disabled")
     
-    # Validate environment variables
+    # Validate configuration
     if not API_ID or not API_HASH:
-        logger.error("Error: API credentials not set. Please set TELEGRAM_API_ID and TELEGRAM_API_HASH.")
+        logger.error("Error: API credentials not set. Please check env_vars-userbot.yml file.")
         return 1
         
     if not BOT_USERNAME:
