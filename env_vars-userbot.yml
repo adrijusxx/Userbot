@@ -1,0 +1,17 @@
+# Telegram Userbot Configuration
+# Copy this file to .env and fill in your values
+
+# Required Telegram API credentials
+TELEGRAM_API_ID: "27567587"
+TELEGRAM_API_HASH: "dd20d2e57837adccf9da7d7ee49c13d6"
+TELEGRAM_BOT_USERNAME: "AfterhoursFWL_Bot"
+
+# Duplicate message handling configuration
+# How long to ignore duplicate messages from the same user (in seconds)
+# Default: 3600 (1 hour)
+DUPLICATE_IGNORE_DURATION=3600
+
+# Enable/disable message tracking for duplicate prevention
+# Options: true, false
+# Default: true
+DUPLICATE_CHECK_ENABLED=true
